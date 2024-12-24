@@ -1,5 +1,5 @@
 ## laravel
-using laravel framework version 11
+using laravel framework version 11 with repository pattern
 
 ## Installation
 1. composer Install
