@@ -21,22 +21,36 @@ class ProductController extends Controller
     }
     
     public function store(Request $request) {
-        $validate = $request->validate([
+        /* $validate = $request->validate([
                         'name' => 'required|string|max:150',
                         'product_category' => 'required|in:Rokok,Obat,Lainnya',
                         'description' => 'nullable|string|max:255'
-                    ]);
-        $products = $this->productService->store($validate);
+                    ]); */
+        // Log validation success
+        // \Log::info('Validation passed:', $request);
+
+        $data =  array (
+            'name' => $request->name,
+            'product_category' => $request->product_category,
+            'description' => $request->description,
+        );
+
+        $products = $this->productService->createProduct($data);
         return response()->json($products);
     }
 
     public function update(Request $request, int $id) {
-        $validate = $request->validate([
+        /* $validate = $request->validate([
             'name' => 'sometimes|string|max:150',
             'product_category' => 'required|in:Rokok,Obat,Lainnya',
             'description' => 'nullable|string|max:255'
-        ]);
-        $products = $this->productService->updateProduct($id, $validate);
+        ]); */
+        $data =  array (
+            'name' => $request->name,
+            'product_category' => $request->product_category,
+            'description' => $request->description,
+        );
+        $products = $this->productService->updateProduct($id, $data);
         return response()->json($products);
     }
 }
