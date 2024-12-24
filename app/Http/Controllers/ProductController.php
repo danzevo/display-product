@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests\ProductRequest;
 use App\Services\ProductService;
+use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
@@ -21,13 +22,15 @@ class ProductController extends Controller
     }
     
     public function store(Request $request) {
-        /* $validate = $request->validate([
+        $validator = Validator::make($request->all(), [
                         'name' => 'required|string|max:150',
                         'product_category' => 'required|in:Rokok,Obat,Lainnya',
                         'description' => 'nullable|string|max:255'
-                    ]); */
-        // Log validation success
-        // \Log::info('Validation passed:', $request);
+                    ]); 
+        
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
 
         $data =  array (
             'name' => $request->name,
@@ -40,11 +43,16 @@ class ProductController extends Controller
     }
 
     public function update(Request $request, int $id) {
-        /* $validate = $request->validate([
+        $validator = Validator::make($request->all(), [
             'name' => 'sometimes|string|max:150',
             'product_category' => 'required|in:Rokok,Obat,Lainnya',
             'description' => 'nullable|string|max:255'
-        ]); */
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
         $data =  array (
             'name' => $request->name,
             'product_category' => $request->product_category,
