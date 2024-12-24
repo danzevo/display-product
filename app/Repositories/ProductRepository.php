@@ -24,24 +24,29 @@ class ProductRepository implements ProductInterface {
             $query->whereRaw('UPPER(product_category) = ? ', [strtoupper($filters['product_category'])]);
         }
 
-        if(!empty($filters['tier'])) {
-            // Filter products where at least one 'priceDetails' has the matching tier
-            $query->whereHas('prices.priceDetails', function ($q) use ($filters) {
-                $q->whereRaw('UPPER(tier) = ?', [strtoupper($filters['tier'])]);
+        // Filter berdasarkan tier
+        if (!empty($filters['tier'])) {
+            $tier = strtoupper($filters['tier']);
+            
+            // Filter produk dengan priceDetails yang cocok
+            $query->whereHas('prices.priceDetails', function ($q) use ($tier) {
+                $q->whereRaw('UPPER(tier) = ?', [$tier]);
             });
-
-            // Eager load prices and priceDetails where the 'tier' matches
-            $query->with(['prices' => function ($query) use ($filters) {
-                $query->with(['priceDetails' => function ($q) use ($filters) {
-                    $q->whereRaw('UPPER(tier) = ?', [strtoupper($filters['tier'])]);
-                }]);
-            }]);
         }
 
-        // Log the query before executing it
-        \Log::info('Executed Query: ' . $query->toSql(), $query->getBindings());
+        // Load produk beserta prices dan priceDetails
+        $products = $query->with(['prices' => function ($priceQuery) use ($filters) {
+            $priceQuery->with(['priceDetails' => function ($priceDetailQuery) use ($filters) {
+                if (!empty($filters['tier'])) {
+                    $tier = strtoupper($filters['tier']);
+                    $priceDetailQuery->whereRaw('UPPER(tier) = ?', [$tier]);
+                }
+            }]);
+        }])->get();
 
-        return $query->with(['prices.priceDetails'])->get();
+        \Log::info('Products Loaded: ', $products->toArray());
+        
+        return $products;
     }
 
     public function create(array $data) {
